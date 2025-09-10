@@ -101,9 +101,16 @@ python demo_plot.py --result_path output/<file_name>.npz
 This first plots 2D result:
 
 <p align="center">
-    <a href=""><img src="assets/plot_2d.png" alt="example" width=80%></a> 
+    <a href=""><img src="assets/plot_2d.jpg" alt="example" width="80%"></a>  
     <br>
 </p>
+
+**From left to right:**
+
+- Input RGB  
+- Distance field over the detected frontier region  
+- Info-gain heatmap (light yellow = high, dark red = low)  
+- 2D frontiers with viewing directions, colored by info gain (note: the colormap is reversed from previous for clearer visualization)
 
 Then press any key to see 3D frontiers in the RGBD pointcloud:
 <p align="center">

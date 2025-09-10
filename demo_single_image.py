@@ -79,7 +79,7 @@ def main():
     parser.add_argument(
         "--depth_source",
         choices=["Metric3D", "UniK3D"],
-        default="UniK3D",
+        default="Metric3D",
         help="Depth estimation model",
     )
     parser.add_argument(

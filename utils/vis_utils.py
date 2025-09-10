@@ -7,6 +7,8 @@ from PIL import Image
 from typing import List, Optional, Tuple, Any
 from utils.geometry import compute_alignment_transforms, pose_difference, rot2quat
 
+FT_GAIN_MAX = 20.0
+FT_EXT_PROB_GAIN_MAX = 1.0
 
 ## Open3D Basic ##
 def create_camera(H, W, focal):
@@ -521,7 +523,6 @@ def visualize_3D_frontier(
         return
 
     inv_extrinsic = np.linalg.inv(extrinsic)
-    gain_max = 20.0  # max volume for normalizing cylinder weight
     scale = 0.08  # sphere radius
 
     scene_geometry = []
@@ -557,7 +558,7 @@ def visualize_3D_frontier(
             wh_ratio=intrinsic[0, 0] / intrinsic[1, 1],
             scale=0.3,
             fovx=90.0,
-            weight=ft.gain / gain_max,
+            weight=ft.gain / FT_GAIN_MAX,
             radius=0.025,
             return_mesh=False,
         )
@@ -595,7 +596,6 @@ def visualize_2D_frontier(
     ft_3D: Optional[List[Any]],
     rgb: np.ndarray,
     img_size: Tuple[int, int],
-    arrow_color: Optional[Tuple[int, int, int]] = None,
 ) -> np.ndarray:
     """
     Overlay 2D frontier points and their view‐directions on the RGB image.
@@ -614,10 +614,18 @@ def visualize_2D_frontier(
     length = 55  # arrow length in pixels
     thickness = 4
     tip_scale = 0.4
-    default_color = (0, 165, 255)  # BGR
-
+    
     for ft in ft_3D:
-        col = arrow_color if arrow_color and len(arrow_color) == 3 else default_color
+        gain = ft.gain 
+        # make the arrow color based on gain (yellow:low, red:high)
+        if gain > 0:
+            gain = gain / FT_GAIN_MAX
+            colormap = LinearSegmentedColormap.from_list(
+                "yellow_red", ["#F6FF55", "#FF0202"]
+            )
+            col = colormap(gain)[:3]  # get RGB
+            col = (int(col[2] * 255), int(col[1] * 255), int(col[0] * 255))  # to BGR
+
         # denormalize pixel position
         u, v = ft.pixel_pos
         px = int(round(u * W))
